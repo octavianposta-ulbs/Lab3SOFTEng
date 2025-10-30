@@ -13,6 +13,7 @@ package org.rosterleague.common;
 
 import java.util.List;
 
+import org.rosterleague.entities.Match;
 
 public interface Request {
     void addPlayer(String playerId, String teamId);
@@ -62,6 +63,12 @@ public interface Request {
     void removePlayer(String playerId);
 
     void removeTeam(String teamId);
+
+    void addMatch(Match match);
+
+    List<Match> getMatchesByTeam(String teamId);
+
+    List<Match> getMatchesByLeague(String leagueId);
 
     void clearAllEntities();
 }

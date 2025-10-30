@@ -2,6 +2,9 @@ package org.rosterleague.servlet;
 
 import java.io.*;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.*;
@@ -10,6 +13,7 @@ import org.rosterleague.common.LeagueDetails;
 import org.rosterleague.common.PlayerDetails;
 import org.rosterleague.common.Request;
 import org.rosterleague.common.TeamDetails;
+import org.rosterleague.entities.Match;
 
 @WebServlet(name = "mainServlet", value = "/")
 public class MainServlet extends HttpServlet {
@@ -27,6 +31,7 @@ public class MainServlet extends HttpServlet {
 
         getSomeInfo();
         getMoreInfo();
+        matchesAndStandings();
         removeInfo();
     }
 
@@ -149,6 +154,26 @@ public class MainServlet extends HttpServlet {
 
             ejbRequest.createPlayer("P34", "Zoria Lepsius", "downhill", 431.00);
             ejbRequest.addPlayer("P34", "T10");
+
+            //Players, Team T7
+            ejbRequest.createPlayer("P35", "Reymar Robinson", "defender", 499.00);
+            ejbRequest.addPlayer("P35", "T7");
+
+            ejbRequest.createPlayer("P36", "Jackie Willson", "forward", 899.00);
+            ejbRequest.addPlayer("P36", "T7");
+
+            ejbRequest.createPlayer("P37", "Alexander Lioness", "midfielder", 389.00);
+            ejbRequest.addPlayer("P37", "T7");
+
+            //Players, Team T8
+            ejbRequest.createPlayer("P38", "James Gilbert", "defender", 599.00);
+            ejbRequest.addPlayer("P38", "T8");
+
+            ejbRequest.createPlayer("P39", "Willy Wales", "point guard", 299.00);
+            ejbRequest.addPlayer("P39", "T8");
+
+            ejbRequest.createPlayer("P40", "Jimmy Jellyman", "forward", 199.00);
+            ejbRequest.addPlayer("P40", "T8");
 
             // Players, no team
             ejbRequest.createPlayer("P26", "Hobie Jackson", "pitcher", 582.00);
@@ -290,6 +315,63 @@ public class MainServlet extends HttpServlet {
 
         } catch (Exception ex) {
             printer.println("Caught an exception: " + ex.getClass() + " : " + ex.getMessage());
+            ex.printStackTrace(printer);
+        }
+    }
+
+    private void matchesAndStandings() {
+        try {
+            List<PlayerDetails> playerList;
+            List<TeamDetails> teamList;
+            teamList = ejbRequest.getTeamsOfLeague("L3");
+
+            ejbRequest.addMatch(new Match("M1", "L2", "T3", "T4", 0, 3));
+            ejbRequest.addMatch(new Match("M2", "L2", "T3", "T4", 3, 0));
+            ejbRequest.addMatch(new Match("M3", "L3", "T6", "T7", 0, 3));
+            ejbRequest.addMatch(new Match("M4", "L3", "T6", "T8", 3, 2));
+            ejbRequest.addMatch(new Match("M5", "L3", "T7", "T8", 1, 3));
+            ejbRequest.addMatch(new Match("M6", "L4", "T9", "T10", 2, 3));
+            ejbRequest.addMatch(new Match("M7", "L4", "T9", "T10", 3, 1));
+
+            printer.println("All matches for team T6:");
+            for (Match m : ejbRequest.getMatchesByTeam("T6")) {
+                printer.println(m);
+            }
+            printer.println();
+
+            Map<String, Integer> points = new HashMap<>();
+            for (Match m : ejbRequest.getMatchesByLeague("L3")) {
+                int pointsForTeam1 = 0, pointsForTeam2 = 0;
+                if (m.getScoreTeam1() > m.getScoreTeam2())
+                    pointsForTeam1 = 3;
+                else if (m.getScoreTeam1() < m.getScoreTeam2())
+                    pointsForTeam2 = 3;
+                else { pointsForTeam1 = 1; pointsForTeam2 = 1; }
+
+                points.put(m.getTeam1Id(), points.getOrDefault(m.getTeam1Id(), 0) + pointsForTeam1);
+                points.put(m.getTeam2Id(), points.getOrDefault(m.getTeam2Id(), 0) + pointsForTeam2);
+            }
+
+            printer.println("Standings for league L3:");
+            List<Map.Entry<String, Integer>> scores = new ArrayList<>(points.entrySet());
+            scores.sort((a, b) -> b.getValue() - a.getValue());
+
+            for (Map.Entry<String, Integer> e : scores) {
+                for(TeamDetails t : teamList) {
+                    if(t.getId().equals(e.getKey())) {
+                        printer.println(e.getKey() + " - " + t.getName());
+                        printer.println("Score: " + e.getValue());
+                        break;
+                    }
+                }
+                printer.println("Players for team " + e.getKey());
+                playerList = ejbRequest.getPlayersOfTeam(e.getKey());
+                printDetailsList(playerList);
+            }
+            printer.println();
+
+        } catch (Exception ex) {
+            printer.println("Exception: " + ex.getMessage());
             ex.printStackTrace(printer);
         }
     }

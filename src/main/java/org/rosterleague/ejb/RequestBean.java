@@ -42,6 +42,8 @@ public class RequestBean implements Request, Serializable {
 
     private static final Logger logger = Logger.getLogger(RequestBean.class.getName());
 
+    private List<Match> matches = new ArrayList<>();
+
     @PersistenceContext
     private EntityManager em;
 
@@ -508,6 +510,34 @@ public class RequestBean implements Request, Serializable {
             throw new EJBException(ex);
         }
         return leagueDetails;
+    }
+
+    @Override
+    public void addMatch(Match match) {
+
+        matches.add(match);
+    }
+
+    @Override
+    public List<Match> getMatchesByTeam(String teamId) {
+        List<Match> result = new ArrayList<>();
+        for (Match m : matches) {
+            if (m.getTeam1Id().equals(teamId) || m.getTeam2Id().equals(teamId)) {
+                result.add(m);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Match> getMatchesByLeague(String leagueId) {
+        List<Match> result = new ArrayList<>();
+        for (Match m : matches) {
+            if (m.getLeagueId().equals(leagueId)) {
+                result.add(m);
+            }
+        }
+        return result;
     }
 
     @Override
