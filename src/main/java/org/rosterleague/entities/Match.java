@@ -1,12 +1,21 @@
 package org.rosterleague.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "PERSISTENCE_ROSTER_MATCH")
 public class Match {
+    @Id
     public String matchId;
     public String leagueId;
     public String team1Id;
     public String team2Id;
     public int scoreTeam1;
     public int scoreTeam2;
+
+    public Match() {}
 
     public Match(String matchId, String leagueId, String team1Id, String team2Id, int scoreTeam1, int scoreTeam2) {
         this.matchId = matchId;
